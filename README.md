@@ -53,6 +53,9 @@ bundle exec jekyll serve
 git clone git@github.com:daniel-e/daniel-e.github.io.git
 rsync -rv _site/* daniel-e.github.io/
 cd daniel-e.github.io/
+git add -A
+git commit -m "new post"
+git push
 ...
 ```
 
