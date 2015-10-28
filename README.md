@@ -35,7 +35,7 @@ sudo ~/docker/docker run -t -i -p 4000:4000 -p 4022:22 -v /tmp:/host jekyll/init
 
 ssh zz@localhost -p 4022
 git clone git@github.com:daniel-e/blog.git
-cd blog.git/src
+cd blog/src
 
 [modify the files]
 
