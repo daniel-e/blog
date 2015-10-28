@@ -47,6 +47,15 @@ sudo bundle update
 bundle exec jekyll serve
 ```
 
+# Publish
+
+```bash
+git clone git@github.com:daniel-e/daniel-e.github.io.git
+rsync -rv _site/* daniel-e.github.io/
+cd daniel-e.github.io/
+...
+```
+
 # Useful links
 
 * http://jekyllthemes.org/
