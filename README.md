@@ -39,3 +39,9 @@ cd blog.git/src
 sudo bundle update
 bundle exec jekyll serve
 
+# Useful links
+
+* http://jekyllthemes.org/
+* https://help.github.com/articles/using-jekyll-with-pages/
+* http://jekyllrb.com/docs/github-pages/
+
