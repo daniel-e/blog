@@ -12,12 +12,11 @@ Because the database from the link above is in a format that cannot be directly 
 ## Download the dataset 
 First, we need to download the dataset. As described [here](https://github.com/daniel-e/rustml#rustml-datasets-package) we execute the following commands on the command line:
 
-<pre>
-# download the installer script
+<pre><code class="bash"># download the installer script
 wget -q https://raw.githubusercontent.com/daniel-e/rustml/master/dl_datasets.sh
 # execute the script
 bash ./dl_datasets.sh
-</pre>
+</code></pre>
 
 The datasets are downloaded into the directory `~/.rustml/`.
 
@@ -25,8 +24,7 @@ The datasets are downloaded into the directory `~/.rustml/`.
 
 Before you can perform the following steps you have to install Rust. If not already installed, download the latest version from [rust-lang.org](https://www.rust-lang.org) and execute the following commands. Otherwise you can skip the steps in the box below.
 
-<pre>
-# unpack the archive (the name of the archive may depend on your system configuration)
+<pre><code class="bash"># unpack the archive (the name of the archive may depend on your system configuration)
 tar xzf ~/Downloads/rust-VERSION-x86_64-unknown-linux-gnu.tar.gz
 
 # change into the directory
@@ -37,7 +35,7 @@ cd rust-VERSION-x86_64-unknown-linux-gnu/
 
 # add the rust directory to the search path
 export PATH=/opt/rust-VERSION/bin:$PATH
-</pre>
+</code></pre>
 
 If Rust was installed successfully we can create a new project with cargo:
 
@@ -54,8 +52,7 @@ rustml = { git = "https://github.com/daniel-e/rustml.git" }
 
 Now, put the following content into the file `main.rs` in the directory `src`:
 
-<pre>
-extern crate rustml;
+<pre><code class="rust">extern crate rustml;
 
 use std::fs::File;
 use std::io::Write;
@@ -78,7 +75,7 @@ fn main() {
         .write_all(s.as_bytes())
         .unwrap();
 }
-</pre>
+</code></pre>
 
 
 After this run the program as follows:
@@ -91,8 +88,7 @@ The output is written into the file `mnist.txt`. Because the size of the file is
 
 Finally, this file can be loaded in Octave via the `load` function.
 
-<pre>
-octave:1> load("mnist.txt.gz");
+<pre><code class="matlab">octave:1> load("mnist.txt.gz");
 octave:2> who
 Variables in the current scope:
 
@@ -102,14 +98,17 @@ octave:3> size(trainX)
 ans =
 
    60000     784
-</pre>
+</code></pre>
 
 Each digit can be visualized in Octave very easily. For example, to display the digit at row 5 of the training examples stored in `trainX` simply do the following:
 
-<pre>
-octave:1> imagesc(reshape(trainX(4, :), 28, 28)');
-</pre>
+<pre><code class="matlab">octave:1> imagesc(reshape(trainX(4, :), 28, 28)');
+</code></pre>
 
 This will show the following image:
 
 ![plot of a digit of the mnist database](/assets/nine.png)
+
+## Sources
+
+All sources and the MNIST database for Octave is available on [GitHub](https://github.com/daniel-e/blogdata/tree/master/mnist2octave).
