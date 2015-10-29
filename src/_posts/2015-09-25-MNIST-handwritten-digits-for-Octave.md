@@ -52,7 +52,7 @@ Append the following two lines (which specify the required dependencies and wher
 rustml = { git = "https://github.com/daniel-e/rustml.git" }
 </pre>
 
-Now, overwrite the file `main.rs` in the directory `src` with the following content:
+Now, put the following content into the file `main.rs` in the directory `src`:
 
 <pre>
 extern crate rustml;
@@ -61,28 +61,22 @@ use std::fs::File;
 use std::io::Write;
 
 use rustml::datasets::MnistDigits;
-use rustml::csv::matrix_to_csv;
-use rustml::matrix::{Matrix, IntoMatrix};
-
-fn write(f: &mut File, m: Matrix&lt;u8&gt;, s: &str) {
-
-    f.write_all(format!(
-        "# name: {}\n# type: matrix\n# rows: {}\n# columns: {}\n{}\n\n",
-        s, m.rows(), m.cols(), matrix_to_csv(&m, " ")
-    ).as_bytes()).unwrap();
-}
+use rustml::io::OctaveFormat;
 
 fn main() {
 
     let (train_x, train_y) = MnistDigits::default_training_set().unwrap();
     let (test_x, test_y) = MnistDigits::default_test_set().unwrap();
 
-    let mut f = File::create("mnist.txt").unwrap();
+    let s = train_x.to_octave_string("trainX") +
+        &train_y.to_octave_string("trainY") +
+        &test_x.to_octave_string("testX") +
+        &test_y.to_octave_string("testY");
 
-    write(&mut f, train_x, "trainX");
-    write(&mut f, train_y.to_matrix(train_y.len()), "trainY");
-    write(&mut f, test_x, "testX");
-    write(&mut f, test_y.to_matrix(test_y.len()), "testY");
+    File::create("mnist.txt")
+        .unwrap()
+        .write_all(s.as_bytes())
+        .unwrap();
 }
 </pre>
 
@@ -110,3 +104,12 @@ ans =
    60000     784
 </pre>
 
+Each digit can be visualized in Octave very easily. For example, to display the digit at row 5 of the training examples stored in `trainX` simply do the following:
+
+<pre>
+octave:1> imagesc(reshape(trainX(4, :), 28, 28)');
+</pre>
+
+This will show the following image:
+
+![plot of a digit of the mnist database](/assets/nine.png)
