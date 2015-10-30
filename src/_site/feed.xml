@@ -41,6 +41,17 @@
       </item>
     
       <item>
+        <title>Permission denied for lsof in Docker</title>
+        <description>
+          
+          On my host system I have installed Linux Mint 17 and on that host I’m running Docker with Ubuntu 14.10. Recently I wanted to call lsof in a Docker container and I got the following permission denied error: root@ada77fe6ef60:/tmp $ lsof -p 751 COMMAND PID USER FD TYPE DEVICE SIZE/OFF...
+        </description>
+        <pubDate>Fri, 26 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-26-permission-denied-for-lsof-in-docker</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-26-permission-denied-for-lsof-in-docker</guid>
+      </item>
+    
+      <item>
         <title>Octave performance - Ubuntu 14.10 vs Linux Mint 17 Qiana</title>
         <description>
           
