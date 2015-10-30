@@ -1,5 +1,6 @@
 ---
 layout: post
+comments: true
 title: MNIST database of handwritten digits for Octave
 ---
 
@@ -118,3 +119,4 @@ This will show the image below:
 ## Sources
 
 All sources and the MNIST database for Octave is available on [GitHub](https://github.com/daniel-e/blogdata/tree/master/mnist2octave).
+
