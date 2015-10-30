@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>daniel-e blog</title>
+    <description>Notes on machine learning, my activities on GitHub and more</description>
+    <link>http://daniel-e.github.io</link>
+    <atom:link href="http://daniel-e.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>Averaging MNIST handwritten digits with Octave</title>
+        <description>
+          
+          In this post we will see how the average digit of the MNIST database of handwritten digits looks like. The MNIST database of handwritten digits (see here) is a very popular dataset used by the machine learning research community for testing the performance of learning algorithms for the task of...
+        </description>
+        <pubDate>Mon, 19 Oct 2015 00:00:00 -0700</pubDate>
+        <link>http://daniel-e.github.io/2015-10-19-averaging-mnist-handwritten-digits-with-octave</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2015-10-19-averaging-mnist-handwritten-digits-with-octave</guid>
+      </item>
+    
+      <item>
+        <title>k-Nearest Neighbors on MNIST digits with Octave</title>
+        <description>
+          
+          TODO
+
+        </description>
+        <pubDate>Mon, 10 Aug 2015 00:00:00 -0700</pubDate>
+        <link>http://daniel-e.github.io/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave</guid>
+      </item>
+    
+      <item>
+        <title>MNIST database of handwritten digits for Octave</title>
+        <description>
+          
+          In this post you will see how to convert the MNIST database of handwritten digits via rustml into a format that can be read with Octave. The MNIST database of handwritten digits (see here) is a very popular dataset used by the machine learning research community for testing the performance...
+        </description>
+        <pubDate>Sat, 25 Jul 2015 00:00:00 -0700</pubDate>
+        <link>http://daniel-e.github.io/2015-07-25-MNIST-handwritten-digits-for-Octave</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2015-07-25-MNIST-handwritten-digits-for-Octave</guid>
+      </item>
+    
+  </channel>
+</rss>
