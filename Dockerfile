@@ -13,6 +13,8 @@ RUN useradd -d /home/zz -m -p pwd -s /bin/bash zz
 ADD authorized_keys /home/zz/.ssh/
 ADD id_rsa /home/zz/.ssh/
 ADD id_rsa.pub /home/zz/.ssh/
+RUN echo "l='ls -l'" >> /home/zz/.bashrc
+RUN echo "..='cd ..'" >> /home/zz/.bashrc
 RUN chown -R zz:zz /home/zz
 
 WORKDIR /home/zz
