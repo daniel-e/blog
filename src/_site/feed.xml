@@ -40,5 +40,16 @@
         <guid isPermaLink="true">http://daniel-e.github.io/2015-07-25-MNIST-handwritten-digits-for-Octave</guid>
       </item>
     
+      <item>
+        <title>Octave performance - Ubuntu 14.10 vs Linux Mint 17 Qiana</title>
+        <description>
+          
+          Recently I played around with Octave that I’ve installed on Ubuntu 14.10 running in a Docker container. The host system on which Docker is running is a Linux Mint 17 (Qiana). I was wondering whether there is a significant overhead induced by Docker when doing big matrix multiplications. So, I’ve...
+        </description>
+        <pubDate>Wed, 24 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-24-octave-performance-ubuntu-14-10-vs-linux-mint-17-quiana</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-24-octave-performance-ubuntu-14-10-vs-linux-mint-17-quiana</guid>
+      </item>
+    
   </channel>
 </rss>

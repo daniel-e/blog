@@ -6,12 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-  <title>daniel-e blog</title>
+  <title>Octave performance - Ubuntu 14.10 vs Linux Mint 17 Qiana</title>
 
   <meta name="author" content="daniel-e" />
   
-  
-  <meta name="description" content="Notes on machine learning, my activities on GitHub and more">
   
 
   <link rel="alternate" type="application/rss+xml" title="daniel-e blog - Notes on machine learning, my activities on GitHub and more" href="/feed.xml" />
@@ -48,11 +46,11 @@
   <script src="/js/highlight.pack.js"></script>
 
   <!-- Facebook OpenGraph tags -->
-  <meta property="og:title" content="daniel-e blog" />
+  <meta property="og:title" content="Octave performance - Ubuntu 14.10 vs Linux Mint 17 Qiana" />
   <meta property="og:type" content="website" />
   
   
-  <meta property="og:url" content="http://daniel-e.github.io" />
+  <meta property="og:url" content="http://daniel-e.github.io/2014-12-24-octave-performance-ubuntu-14-10-vs-linux-mint-17-quiana/" />
   
   
   
@@ -100,111 +98,111 @@
 </nav>  
 
     <div role="main" class="container main-content">
-      
-<header class="header-page">
+      <header class="header-post">
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-	  <div class="page-heading">
-	    <h1>daniel-e blog</h1>
-	    
-	    <hr class="small">
-	    <span class="page-subheading">Notes on machine learning, my activities on GitHub and more</span>
-	    
-	  </div>
-    </div>
+      <div class="post-heading">
+        <h1>Octave performance - Ubuntu 14.10 vs Linux Mint 17 Qiana</h1>
+        
+        <span class="post-meta">Posted on December 24, 2014</span>
+      </div>
+     </div>
   </div>
 </header>
 
+<article>
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+	  <p>Recently I played around with Octave that I’ve installed on Ubuntu 14.10 running in a Docker container. The host system on which Docker is running is a Linux Mint 17 (Qiana). I was wondering whether there is a significant overhead induced by Docker when doing big matrix multiplications. So, I’ve done a quick test in Octave. First,  I have multiplied a 5000x5000 matrix with Octave on Ubuntu 14.10 in the Docker container. Then, I have multiplied another matrix with the same dimensions on Linux Mint 17. The very surprising result was as follows:</p>
+
+<p><img src="/assets/matrix_multiplication_ubuntu_vs_mint.png" alt="performance doing a matrix multiplication" /></p>
+
+<p>As you can see multiplying a 5000x5000 matrix on Ubuntu 14.10 was 5x faster than doing the same operation on Linux Mint 17. It took 31 seconds in the Ubuntu container and 161 seconds on the Linux Mint system.</p>
+
+<p>The exact Octave command I was doing was the following one:</p>
+
+<pre><code class="matlab">octave:1&gt; x = rand(5000, 5000);
+octave:2&gt; tic, x*x; toc
+</code></pre>
+
+<p>Neither Octave on Ubuntu nor Octave on Linux Mint used more than one thread for the multiplication. Both versions consumed 100% of one CPU during the complete computation.</p>
+
+<p><em>So the question was why Octave that comes with Ubuntu is 5x faster compared to Octave that comes with Linux Mint 17?</em></p>
+
+<p>I’ve started Octave on the host system, determined the process id and looked at the libraries which the process has opened. I compared the list of these libraries with the list of libraries that have been opened by Octave that comes with Ubuntu.</p>
+
+<p>One difference that was conspicuous was the fact that the process on the host did not open the ATLAS library.</p>
+
+<p>Host/Linux Mint 17:</p>
+
+<pre><code class="bash">xx@linuxmint ~ $ sudo lsof -p 19673 | egrep "blas|atlas|lapack"
+/usr/lib/libblas/libblas.so.3.0
+/usr/lib/lapack/liblapack.so.3.0
+</code></pre>
+
+<p>Docker/Ubuntu:</p>
+
+<pre><code class="bash">root@ada77fe6ef60:/tmp $ sudo lsof -p 751 | egrep "blas|atlas|lapack"
+/usr/lib/atlas-base/libatlas.so.3.0
+/usr/lib/atlas-base/atlas/libblas.so.3.0
+/usr/lib/atlas-base/atlas/liblapack.so.3.0
+</code></pre>
+
+<p>I’ve looked whether the ATLAS library was installed on the host system, but it wasn’t. So I installed it with the following command:</p>
+
+<pre><code clsas="bash">sudo apt-get install libatlas3-base
+</code></pre>
+
+<p>I’ve started Octave again and finally Octave on the host did the matrix multiplication in 31 seconds, as fast as Octave that comes with Ubuntu.</p>
+
+<p>Now, when looking at the opened libraries on the host we can see the dependency to the ATLAS library (libblas.so.3 is now taken from a different path):</p>
+
+<pre><code class="bash">xx@linuxmint ~ $ lsof -p 13463 | egrep "blas|atlas|lapack"
+/usr/lib/atlas-base/atlas/libblas.so.3.0
+/usr/lib/lapack/liblapack.so.3.0
+</code></pre>
+
+	</div>
+  </div>
+</article>
 
 <div class="row">
   <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-    <!--
-<div class="main-explain-area jumbotron">
-</div>
--->
-
-<div class="posts-list">
-  
-  <article class="post-preview">
-    <a href="/2015-10-19-averaging-mnist-handwritten-digits-with-octave">
-	  <h2 class="post-title">Averaging MNIST handwritten digits with Octave</h2>
-	
-	    
-    </a>
-
-    <p class="post-meta">
-      Posted on October 19, 2015
-    </p>
-  
-    <div class="post-entry">
-      In this post we will see how the average digit of the MNIST database of handwritten digits looks like.  The MNIST database of handwritten digits (see here) is a very popular dataset used by the machine learning research community for testing the performance of learning algorithms for the...
-	  <a href="/2015-10-19-averaging-mnist-handwritten-digits-with-octave" class="post-read-more">[Read&nbsp;More]</a>
-    </div>
-  
-   </article>
-  
-  <article class="post-preview">
-    <a href="/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave">
-	  <h2 class="post-title">k-Nearest Neighbors on MNIST digits with Octave</h2>
-	
-	    
-    </a>
-
-    <p class="post-meta">
-      Posted on August 10, 2015
-    </p>
-  
-    <div class="post-entry">
-      TODO
-
-	  <a href="/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave" class="post-read-more">[Read&nbsp;More]</a>
-    </div>
-  
-   </article>
-  
-  <article class="post-preview">
-    <a href="/2015-07-25-MNIST-handwritten-digits-for-Octave">
-	  <h2 class="post-title">MNIST database of handwritten digits for Octave</h2>
-	
-	    
-    </a>
-
-    <p class="post-meta">
-      Posted on July 25, 2015
-    </p>
-  
-    <div class="post-entry">
-      In this post you will see how to convert the MNIST database of handwritten digits via rustml into a format that can be read with Octave. The MNIST database of handwritten digits (see here) is a very popular dataset used by the machine learning research community for...
-	  <a href="/2015-07-25-MNIST-handwritten-digits-for-Octave" class="post-read-more">[Read&nbsp;More]</a>
-    </div>
-  
-   </article>
-  
-  <article class="post-preview">
-    <a href="/2014-12-24-octave-performance-ubuntu-14-10-vs-linux-mint-17-quiana">
-	  <h2 class="post-title">Octave performance - Ubuntu 14.10 vs Linux Mint 17 Qiana</h2>
-	
-	    
-    </a>
-
-    <p class="post-meta">
-      Posted on December 24, 2014
-    </p>
-  
-    <div class="post-entry">
-      Recently I played around with Octave that I’ve installed on Ubuntu 14.10 running in a Docker container. The host system on which Docker is running is a Linux Mint 17 (Qiana). I was wondering whether there is a significant overhead induced by Docker when doing big matrix multiplications. So, I’ve...
-	  <a href="/2014-12-24-octave-performance-ubuntu-14-10-vs-linux-mint-17-quiana" class="post-read-more">[Read&nbsp;More]</a>
-    </div>
-  
-   </article>
-  
-</div>
-
-
-
-	
+    <ul class="pager blog-pager">
+      
+      
+      <li class="next">
+        <a href="/2015-07-25-MNIST-handwritten-digits-for-Octave" data-toggle="tooltip" data-placement="top" title="MNIST database of handwritten digits for Octave">Next Post &rarr;</a>
+      </li>
+      
+    </ul>
   </div>
 </div>
+
+
+<div class="row disqus-comments">
+  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    
+<div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+	    var disqus_shortname = 'danieleblog';
+	    // ensure that pages with query string get the same discussion
+            var url_parts = window.location.href.split("?");
+            var disqus_url = url_parts[0];	    
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+
+  </div>
+</div>
+
 
     </div>
 
