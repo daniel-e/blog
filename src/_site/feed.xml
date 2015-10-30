@@ -41,6 +41,39 @@
       </item>
     
       <item>
+        <title>Maximum GFLOPS for an element-wise matrix multiplication</title>
+        <description>
+          
+          A question that often comes into my mind when doing computations with Octave or other numerical libraries is how good do they utilize the CPU. Recently I was interested in estimating the number of GFLOPS that can be achieved with Octave for the element-wise matrix multiplication. For an nxn matrix...
+        </description>
+        <pubDate>Wed, 31 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-31-maximum-gflops-element-wise-matrix-multiplication</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-31-maximum-gflops-element-wise-matrix-multiplication</guid>
+      </item>
+    
+      <item>
+        <title>Octave matrix multiplication performance for different BLAS implementations</title>
+        <description>
+          
+          Octave is a tool for doing linear algebra. When doing linear algebra one of the most fundamental operations is the matrix multiplication. A straightforward algorithm to do a matrix operation requires O(n³) multiplications. In 196 Strassen developed an algorithm for multiplying big matrices (n &amp;gt; 100 to 1000) which requires...
+        </description>
+        <pubDate>Sat, 27 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas</guid>
+      </item>
+    
+      <item>
+        <title>CPU Throttling apparently enabled</title>
+        <description>
+          
+          When compiling ATLAS (Automatically Tuned Linear Algebra Software) on modern CPUs it may happen that you get the following error message: CPU Throttling apparently enabled! It appears you have cpu throttling enabled, which makes timings unreliable and an ATLAS install nonsensical. Aborting. This is because today most operating systems  turn...
+        </description>
+        <pubDate>Sat, 27 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-27-cpu-throttling-apparently-enabled</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-27-cpu-throttling-apparently-enabled</guid>
+      </item>
+    
+      <item>
         <title>Permission denied for lsof in Docker</title>
         <description>
           

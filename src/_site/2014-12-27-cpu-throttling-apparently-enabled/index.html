@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-  <title>MNIST database of handwritten digits for Octave</title>
+  <title>CPU Throttling apparently enabled</title>
 
   <meta name="author" content="daniel-e" />
   
@@ -46,11 +46,11 @@
   <script src="/js/highlight.pack.js"></script>
 
   <!-- Facebook OpenGraph tags -->
-  <meta property="og:title" content="MNIST database of handwritten digits for Octave" />
+  <meta property="og:title" content="CPU Throttling apparently enabled" />
   <meta property="og:type" content="website" />
   
   
-  <meta property="og:url" content="http://daniel-e.github.io/2015-07-25-MNIST-handwritten-digits-for-Octave/" />
+  <meta property="og:url" content="http://daniel-e.github.io/2014-12-27-cpu-throttling-apparently-enabled/" />
   
   
   
@@ -102,9 +102,9 @@
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
       <div class="post-heading">
-        <h1>MNIST database of handwritten digits for Octave</h1>
+        <h1>CPU Throttling apparently enabled</h1>
         
-        <span class="post-meta">Posted on July 25, 2015</span>
+        <span class="post-meta">Posted on December 27, 2014</span>
       </div>
      </div>
   </div>
@@ -113,122 +113,36 @@
 <article>
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-	  <p>In this post you will see how to convert the MNIST database of handwritten digits via <a href="/rustml/rustml/">rustml</a> into a format that can be read with <a href="https://www.gnu.org/software/octave/">Octave</a>.</p>
+	  <p>When compiling <a href="http://math-atlas.sourceforge.net/">ATLAS</a> (Automatically Tuned Linear Algebra Software) on modern CPUs it may happen that you get the following error message:</p>
 
-<p>The MNIST database of handwritten digits (see <a href="http://yann.lecun.com/exdb/mnist/">here</a>) is a very popular dataset used by the machine learning research community for testing the performance of classification algorithms. It contains 60,000 labeled training examples of handwritten digits between 0 and 9 (both including) and 10,000 labeled examples for testing. Each digit is represented as a grayscale image each with a width and height of 28 pixels. The value of a pixel is in the interval [0, 255].</p>
-
-<p>Because the database from the link above is in a format that cannot be directly processed with Octave we will use <a href="/rustml/rustml">rustml</a> to convert it into a format that can be read with Octave.</p>
-
-<h2 id="download-the-dataset">Download the dataset</h2>
-<p>First, we need to download the original dataset. As described <a href="https://github.com/daniel-e/rustml#rustml-datasets-package">here</a> we execute the following commands on the command line:</p>
-
-<pre><code class="bash"># download the installer script
-wget -q https://raw.githubusercontent.com/daniel-e/rustml/master/dl_datasets.sh
-# execute the script
-bash ./dl_datasets.sh
-</code></pre>
-
-<p>The installer script will download the datasets into the directory <code>~/.rustml/</code>.</p>
-
-<h2 id="converting-the-dataset">Converting the dataset</h2>
-
-<p>Before you can perform the following steps you have to install the Rust programming language. If not already installed, download the latest version from <a href="https://www.rust-lang.org">rust-lang.org</a> and execute the following commands on the command line. Skip the instructions in the box below if Rust is already installed.</p>
-
-<pre><code class="bash"># unpack the archive (the name of the archive may depend on your system configuration)
-tar xzf ~/Downloads/rust-VERSION-x86_64-unknown-linux-gnu.tar.gz
-
-# change into the directory
-cd rust-VERSION-x86_64-unknown-linux-gnu/
-
-# execute the install script with the destination directory
-./install.sh --prefix=/opt/rust-VERSION
-
-# add the rust directory to the search path
-export PATH=/opt/rust-VERSION/bin:$PATH
-</code></pre>
-
-<p>If Rust was installed successfully we create a new project with cargo:</p>
-
-<pre>
-cargo new --bin convert
+<pre>CPU Throttling apparently enabled!
+It appears you have cpu throttling enabled, which makes timings
+unreliable and an ATLAS install nonsensical.  Aborting.
 </pre>
 
-<p>Append the following two lines (which specify the required dependencies and where to search for them) to <code>Cargo.toml</code> which is located in the directory created by the command above.</p>
+<p>This is because today most operating systems  turn CPUs in throttling for power management. Unfortunately, with throttling being enabled ATLAS cannot be compiled because this makes timings random. Thus, before ATLAS can be compiled CPU throttling must be disabled. On Ubuntu this is quite easy.</p>
 
-<pre>
-[dependencies]
-rustml = { git = "https://github.com/daniel-e/rustml.git" }
+<p>First, let’s see what governors are configured for each CPU. The following command loops over all CPUs and reads the governor that is configured for each CPU:</p>
+
+<pre><code class="bash">for i in $(seq 0 $((`nproc`-1))); do cat /sys/devices/system/cpu/cpu$i/cpufreq/scaling_governor; done
+</code></pre>
+
+<p>The output should be similar to the following:</p>
+
+<pre>ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
 </pre>
 
-<p>Put the following content into the file <code>main.rs</code> which is located in the directory <code>src</code>:</p>
+<p>On Ubuntu those values should be “performance”. To set them to “performance” execute the following command:</p>
 
-<pre><code class="rust">extern crate rustml;
-
-use std::fs::File;
-use std::io::Write;
-
-use rustml::datasets::MnistDigits;
-use rustml::io::OctaveFormat;
-
-fn main() {
-
-    let (train_x, train_y) = MnistDigits::default_training_set().unwrap();
-    let (test_x, test_y) = MnistDigits::default_test_set().unwrap();
-
-    let s = train_x.to_octave_string("trainX") +
-        &amp;train_y.to_octave_string("trainY") +
-        &amp;test_x.to_octave_string("testX") +
-        &amp;test_y.to_octave_string("testY");
-
-    File::create("mnist.txt")
-        .unwrap()
-        .write_all(s.as_bytes())
-        .unwrap();
-}
+<pre><code class="bash">for i in $(seq 0 $((`nproc`-1))); do echo $i; cpufreq-set -c $i -g performance; done
 </code></pre>
-
-<p>You can also download the sources directly:</p>
-<pre><code class="bash">git clone git@github.com:daniel-e/blogdata.git
-cd blogdata/mnist2octave/
-</code></pre>
-
-<p>Now, the program can be build and executed as follows:</p>
-
-<pre>
-cargo run
-</pre>
-
-<h2 id="result">Result</h2>
-
-<p>The result is written into the file <code>mnist.txt</code> in the current working directory. Because the size of the file is roughly 120MB and Octave can also handle gzip compressed files we compress the text file with the command <code>gzip mnist.txt</code> to reduce its size. The result is a file <code>mnist.txt.gz</code> with a size of roughly 15MB.</p>
-
-<p>Finally, this file can be loaded via the <code>load</code> function in Octave.</p>
-
-<pre><code class="matlab">octave:1&gt; load("mnist.txt.gz");
-octave:2&gt; who
-Variables in the current scope:
-
-testX   testY   trainX  trainY
-
-octave:3&gt; size(trainX)
-ans =
-
-   60000     784
-</code></pre>
-
-<p>Each digit can be visualized in Octave very easily. For example, to display the digit at row 5 of the training examples stored in the matrix <code>trainX</code> simply do the following:</p>
-
-<pre><code class="matlab">octave:1&gt; imagesc(reshape(trainX(4, :), 28, 28)');
-</code></pre>
-
-<p>This will show the image below:</p>
-
-<p><img src="/assets/nine.png" alt="plot of a digit of the mnist database" /></p>
-
-<h2 id="sources">Sources</h2>
-
-<p>All sources and the MNIST database for Octave is available on <a href="https://github.com/daniel-e/blogdata/tree/master/mnist2octave">GitHub</a>.</p>
-
 
 	</div>
   </div>
@@ -239,12 +153,12 @@ ans =
     <ul class="pager blog-pager">
       
       <li class="previous">
-        <a href="/2014-12-31-maximum-gflops-element-wise-matrix-multiplication" data-toggle="tooltip" data-placement="top" title="Maximum GFLOPS for an element-wise matrix multiplication">&larr; Previous Post</a>
+        <a href="/2014-12-26-permission-denied-for-lsof-in-docker" data-toggle="tooltip" data-placement="top" title="Permission denied for lsof in Docker">&larr; Previous Post</a>
       </li>
       
       
       <li class="next">
-        <a href="/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave" data-toggle="tooltip" data-placement="top" title="k-Nearest Neighbors on MNIST digits with Octave">Next Post &rarr;</a>
+        <a href="/2014-12-27-octave-matrix-multiplication-performance-blas" data-toggle="tooltip" data-placement="top" title="Octave matrix multiplication performance for different BLAS implementations">Next Post &rarr;</a>
       </li>
       
     </ul>

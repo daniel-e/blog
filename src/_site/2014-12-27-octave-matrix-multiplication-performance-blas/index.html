@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-  <title>MNIST database of handwritten digits for Octave</title>
+  <title>Octave matrix multiplication performance for different BLAS implementations</title>
 
   <meta name="author" content="daniel-e" />
   
@@ -46,11 +46,11 @@
   <script src="/js/highlight.pack.js"></script>
 
   <!-- Facebook OpenGraph tags -->
-  <meta property="og:title" content="MNIST database of handwritten digits for Octave" />
+  <meta property="og:title" content="Octave matrix multiplication performance for different BLAS implementations" />
   <meta property="og:type" content="website" />
   
   
-  <meta property="og:url" content="http://daniel-e.github.io/2015-07-25-MNIST-handwritten-digits-for-Octave/" />
+  <meta property="og:url" content="http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas/" />
   
   
   
@@ -102,9 +102,9 @@
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
       <div class="post-heading">
-        <h1>MNIST database of handwritten digits for Octave</h1>
+        <h1>Octave matrix multiplication performance for different BLAS implementations</h1>
         
-        <span class="post-meta">Posted on July 25, 2015</span>
+        <span class="post-meta">Posted on December 27, 2014</span>
       </div>
      </div>
   </div>
@@ -113,121 +113,32 @@
 <article>
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-	  <p>In this post you will see how to convert the MNIST database of handwritten digits via <a href="/rustml/rustml/">rustml</a> into a format that can be read with <a href="https://www.gnu.org/software/octave/">Octave</a>.</p>
+	  <p>Octave is a tool for doing linear algebra. When doing linear algebra one of the most fundamental operations is the <a href="http://en.wikipedia.org/wiki/Matrix_multiplication">matrix multiplication</a>. A straightforward algorithm to do a matrix operation requires O(n³) multiplications. In 196 <a href="http://en.wikipedia.org/wiki/Matrix_multiplication#Algorithms_for_efficient_matrix_multiplication">Strassen developed an algorithm</a> for multiplying big matrices (n &gt; 100 to 1000) which requires O(n^2.807) multiplications.</p>
 
-<p>The MNIST database of handwritten digits (see <a href="http://yann.lecun.com/exdb/mnist/">here</a>) is a very popular dataset used by the machine learning research community for testing the performance of classification algorithms. It contains 60,000 labeled training examples of handwritten digits between 0 and 9 (both including) and 10,000 labeled examples for testing. Each digit is represented as a grayscale image each with a width and height of 28 pixels. The value of a pixel is in the interval [0, 255].</p>
+<p>Octave can use different implementations for doing matrix multiplication, e.g. <a href="http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">BLAS</a>, <a href="http://en.wikipedia.org/wiki/Automatically_Tuned_Linear_Algebra_Software">ATLAS</a> and <a href="http://www.openblas.net/">OpenBLAS</a>. We have measured the performances of the different implementations for this post.</p>
 
-<p>Because the database from the link above is in a format that cannot be directly processed with Octave we will use <a href="/rustml/rustml">rustml</a> to convert it into a format that can be read with Octave.</p>
+<p>All tests were running on a quad-core Intel(R) Core(TM) i7-2670QM CPU @ 2.20GHz with hyperthreading enabled. As Linux we used Linux Mint 17 (Qiana) on which we installed the packages “octave” and “libatlas3-base”. This configuration we will refer to as “default” in this post. We have also tested ATLAS, the single-threaded (“satlas”) and the multi-threaded (“tatlas”) versions and OpenBLAS (“openblas”) which is multi-treaded by default.</p>
 
-<h2 id="download-the-dataset">Download the dataset</h2>
-<p>First, we need to download the original dataset. As described <a href="https://github.com/daniel-e/rustml#rustml-datasets-package">here</a> we execute the following commands on the command line:</p>
+<p>Before we compiled ATLAS we have configured it with the following arguments:</p>
 
-<pre><code class="bash"># download the installer script
-wget -q https://raw.githubusercontent.com/daniel-e/rustml/master/dl_datasets.sh
-# execute the script
-bash ./dl_datasets.sh
+<pre><code class="bash">./configure -b 64 --shared -D -c -DPentiumCPS=2200 --with-netlib-lapack-tarfile=lapack-3.5.0.tgz
 </code></pre>
 
-<p>The installer script will download the datasets into the directory <code>~/.rustml/</code>.</p>
+<p>For OpenBLAS we used the default configuration and just executed make to create the libraries.</p>
 
-<h2 id="converting-the-dataset">Converting the dataset</h2>
+<p>As all libraries have been created we started Octave as follows:</p>
 
-<p>Before you can perform the following steps you have to install the Rust programming language. If not already installed, download the latest version from <a href="https://www.rust-lang.org">rust-lang.org</a> and execute the following commands on the command line. Skip the instructions in the box below if Rust is already installed.</p>
-
-<pre><code class="bash"># unpack the archive (the name of the archive may depend on your system configuration)
-tar xzf ~/Downloads/rust-VERSION-x86_64-unknown-linux-gnu.tar.gz
-
-# change into the directory
-cd rust-VERSION-x86_64-unknown-linux-gnu/
-
-# execute the install script with the destination directory
-./install.sh --prefix=/opt/rust-VERSION
-
-# add the rust directory to the search path
-export PATH=/opt/rust-VERSION/bin:$PATH
-</code></pre>
-
-<p>If Rust was installed successfully we create a new project with cargo:</p>
-
-<pre>
-cargo new --bin convert
+<pre>default : octave -p perf.m
+satlas  : LD_PRELOAD=libsatlas.so octave -p perf.m
+tatlas  : LD_PRELOAD=libtatlas.so octave -p perf.m
+openblas: LD_PRELOAD=libopenblas.so octave -p perf.m
 </pre>
 
-<p>Append the following two lines (which specify the required dependencies and where to search for them) to <code>Cargo.toml</code> which is located in the directory created by the command above.</p>
+<p>The fastest implementation is OpenBLAS. It took 5.1 seconds to multiply a 5000x5000 matrix. The multi-threaded ATLAS implementation took 6.9 seconds, the single-threaded implementation took 18 seconds and the default configuration required 32 seconds to multiply the matrix.</p>
 
-<pre>
-[dependencies]
-rustml = { git = "https://github.com/daniel-e/rustml.git" }
-</pre>
+<p>Just for comparison we also added 100 times a 5000x5000 matrix. It took for all implementations about 13.5 seconds, i.e. one 5000x5000 matrix addition took approximately 0.135 seconds.</p>
 
-<p>Put the following content into the file <code>main.rs</code> which is located in the directory <code>src</code>:</p>
-
-<pre><code class="rust">extern crate rustml;
-
-use std::fs::File;
-use std::io::Write;
-
-use rustml::datasets::MnistDigits;
-use rustml::io::OctaveFormat;
-
-fn main() {
-
-    let (train_x, train_y) = MnistDigits::default_training_set().unwrap();
-    let (test_x, test_y) = MnistDigits::default_test_set().unwrap();
-
-    let s = train_x.to_octave_string("trainX") +
-        &amp;train_y.to_octave_string("trainY") +
-        &amp;test_x.to_octave_string("testX") +
-        &amp;test_y.to_octave_string("testY");
-
-    File::create("mnist.txt")
-        .unwrap()
-        .write_all(s.as_bytes())
-        .unwrap();
-}
-</code></pre>
-
-<p>You can also download the sources directly:</p>
-<pre><code class="bash">git clone git@github.com:daniel-e/blogdata.git
-cd blogdata/mnist2octave/
-</code></pre>
-
-<p>Now, the program can be build and executed as follows:</p>
-
-<pre>
-cargo run
-</pre>
-
-<h2 id="result">Result</h2>
-
-<p>The result is written into the file <code>mnist.txt</code> in the current working directory. Because the size of the file is roughly 120MB and Octave can also handle gzip compressed files we compress the text file with the command <code>gzip mnist.txt</code> to reduce its size. The result is a file <code>mnist.txt.gz</code> with a size of roughly 15MB.</p>
-
-<p>Finally, this file can be loaded via the <code>load</code> function in Octave.</p>
-
-<pre><code class="matlab">octave:1&gt; load("mnist.txt.gz");
-octave:2&gt; who
-Variables in the current scope:
-
-testX   testY   trainX  trainY
-
-octave:3&gt; size(trainX)
-ans =
-
-   60000     784
-</code></pre>
-
-<p>Each digit can be visualized in Octave very easily. For example, to display the digit at row 5 of the training examples stored in the matrix <code>trainX</code> simply do the following:</p>
-
-<pre><code class="matlab">octave:1&gt; imagesc(reshape(trainX(4, :), 28, 28)');
-</code></pre>
-
-<p>This will show the image below:</p>
-
-<p><img src="/assets/nine.png" alt="plot of a digit of the mnist database" /></p>
-
-<h2 id="sources">Sources</h2>
-
-<p>All sources and the MNIST database for Octave is available on <a href="https://github.com/daniel-e/blogdata/tree/master/mnist2octave">GitHub</a>.</p>
+<p><img src="/assets/perfchartmult1.png" alt="performance of different blas implemenations" /></p>
 
 
 	</div>
@@ -239,12 +150,12 @@ ans =
     <ul class="pager blog-pager">
       
       <li class="previous">
-        <a href="/2014-12-31-maximum-gflops-element-wise-matrix-multiplication" data-toggle="tooltip" data-placement="top" title="Maximum GFLOPS for an element-wise matrix multiplication">&larr; Previous Post</a>
+        <a href="/2014-12-27-cpu-throttling-apparently-enabled" data-toggle="tooltip" data-placement="top" title="CPU Throttling apparently enabled">&larr; Previous Post</a>
       </li>
       
       
       <li class="next">
-        <a href="/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave" data-toggle="tooltip" data-placement="top" title="k-Nearest Neighbors on MNIST digits with Octave">Next Post &rarr;</a>
+        <a href="/2014-12-31-maximum-gflops-element-wise-matrix-multiplication" data-toggle="tooltip" data-placement="top" title="Maximum GFLOPS for an element-wise matrix multiplication">Next Post &rarr;</a>
       </li>
       
     </ul>

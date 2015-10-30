@@ -52,7 +52,7 @@
   <meta property="og:type" content="website" />
   
   
-  <meta property="og:url" content="http://daniel-e.github.io" />
+  <meta property="og:url" content="http://daniel-e.github.io/page2" />
   
   
   
@@ -126,81 +126,8 @@
 <div class="posts-list">
   
   <article class="post-preview">
-    <a href="/2015-10-19-averaging-mnist-handwritten-digits-with-octave">
-	  <h2 class="post-title">Averaging MNIST handwritten digits with Octave</h2>
-	
-	    
-    </a>
-
-    <p class="post-meta">
-      Posted on October 19, 2015
-    </p>
-  
-    <div class="post-entry">
-      In this post we will see how the average digit of the MNIST database of handwritten digits looks like.  The MNIST database of handwritten digits (see here) is a very popular dataset used by the machine learning research community for testing the performance of learning algorithms for the...
-	  <a href="/2015-10-19-averaging-mnist-handwritten-digits-with-octave" class="post-read-more">[Read&nbsp;More]</a>
-    </div>
-  
-   </article>
-  
-  <article class="post-preview">
-    <a href="/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave">
-	  <h2 class="post-title">k-Nearest Neighbors on MNIST digits with Octave</h2>
-	
-	    
-    </a>
-
-    <p class="post-meta">
-      Posted on August 10, 2015
-    </p>
-  
-    <div class="post-entry">
-      TODO
-
-	  <a href="/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave" class="post-read-more">[Read&nbsp;More]</a>
-    </div>
-  
-   </article>
-  
-  <article class="post-preview">
-    <a href="/2015-07-25-MNIST-handwritten-digits-for-Octave">
-	  <h2 class="post-title">MNIST database of handwritten digits for Octave</h2>
-	
-	    
-    </a>
-
-    <p class="post-meta">
-      Posted on July 25, 2015
-    </p>
-  
-    <div class="post-entry">
-      In this post you will see how to convert the MNIST database of handwritten digits via rustml into a format that can be read with Octave. The MNIST database of handwritten digits (see here) is a very popular dataset used by the machine learning research community for...
-	  <a href="/2015-07-25-MNIST-handwritten-digits-for-Octave" class="post-read-more">[Read&nbsp;More]</a>
-    </div>
-  
-   </article>
-  
-  <article class="post-preview">
-    <a href="/2014-12-31-maximum-gflops-element-wise-matrix-multiplication">
-	  <h2 class="post-title">Maximum GFLOPS for an element-wise matrix multiplication</h2>
-	
-	    
-    </a>
-
-    <p class="post-meta">
-      Posted on December 31, 2014
-    </p>
-  
-    <div class="post-entry">
-      A question that often comes into my mind when doing computations with Octave or other numerical libraries is how good do they utilize the CPU. Recently I was interested in estimating the number of GFLOPS that can be achieved with Octave for the element-wise matrix multiplication. For an nxn matrix...
-	  <a href="/2014-12-31-maximum-gflops-element-wise-matrix-multiplication" class="post-read-more">[Read&nbsp;More]</a>
-    </div>
-  
-   </article>
-  
-  <article class="post-preview">
-    <a href="/2014-12-27-octave-matrix-multiplication-performance-blas">
-	  <h2 class="post-title">Octave matrix multiplication performance for different BLAS implementations</h2>
+    <a href="/2014-12-27-cpu-throttling-apparently-enabled">
+	  <h2 class="post-title">CPU Throttling apparently enabled</h2>
 	
 	    
     </a>
@@ -210,8 +137,44 @@
     </p>
   
     <div class="post-entry">
-      Octave is a tool for doing linear algebra. When doing linear algebra one of the most fundamental operations is the matrix multiplication. A straightforward algorithm to do a matrix operation requires O(n³) multiplications. In 196 Strassen developed an algorithm for multiplying big matrices (n &gt; 100 to 1000)...
-	  <a href="/2014-12-27-octave-matrix-multiplication-performance-blas" class="post-read-more">[Read&nbsp;More]</a>
+      When compiling ATLAS (Automatically Tuned Linear Algebra Software) on modern CPUs it may happen that you get the following error message: CPU Throttling apparently enabled! It appears you have cpu throttling enabled, which makes timings unreliable and an ATLAS install nonsensical. Aborting.  This is because today most operating...
+	  <a href="/2014-12-27-cpu-throttling-apparently-enabled" class="post-read-more">[Read&nbsp;More]</a>
+    </div>
+  
+   </article>
+  
+  <article class="post-preview">
+    <a href="/2014-12-26-permission-denied-for-lsof-in-docker">
+	  <h2 class="post-title">Permission denied for lsof in Docker</h2>
+	
+	    
+    </a>
+
+    <p class="post-meta">
+      Posted on December 26, 2014
+    </p>
+  
+    <div class="post-entry">
+      On my host system I have installed Linux Mint 17 and on that host I’m running Docker with Ubuntu 14.10. Recently I wanted to call lsof in a Docker container and I got the following permission denied error: root@ada77fe6ef60:/tmp $ lsof -p 751 COMMAND PID USER FD TYPE DEVICE...
+	  <a href="/2014-12-26-permission-denied-for-lsof-in-docker" class="post-read-more">[Read&nbsp;More]</a>
+    </div>
+  
+   </article>
+  
+  <article class="post-preview">
+    <a href="/2014-12-24-octave-performance-ubuntu-14-10-vs-linux-mint-17-quiana">
+	  <h2 class="post-title">Octave performance - Ubuntu 14.10 vs Linux Mint 17 Qiana</h2>
+	
+	    
+    </a>
+
+    <p class="post-meta">
+      Posted on December 24, 2014
+    </p>
+  
+    <div class="post-entry">
+      Recently I played around with Octave that I’ve installed on Ubuntu 14.10 running in a Docker container. The host system on which Docker is running is a Linux Mint 17 (Qiana). I was wondering whether there is a significant overhead induced by Docker when doing big matrix multiplications. So, I’ve...
+	  <a href="/2014-12-24-octave-performance-ubuntu-14-10-vs-linux-mint-17-quiana" class="post-read-more">[Read&nbsp;More]</a>
     </div>
   
    </article>
@@ -221,10 +184,10 @@
 
 <ul class="pager main-pager">
   
-  
-  <li class="next">
-    <a href="/page2">Older Posts &rarr;</a>
+  <li class="previous">
+    <a href="/index.html">&larr; Newer Posts</a>
   </li>
+  
   
 </ul>
 
