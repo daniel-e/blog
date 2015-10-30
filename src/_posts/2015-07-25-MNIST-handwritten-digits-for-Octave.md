@@ -1,6 +1,5 @@
 ---
 layout: post
-comments: true
 title: MNIST database of handwritten digits for Octave
 ---
 
