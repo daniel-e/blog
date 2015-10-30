@@ -3,6 +3,7 @@ FROM ubuntu:15.10
 RUN apt-get update
 RUN apt-get install -y ruby vim aptitude ruby2.1-dev build-essential zlibc zlib1g-dev ruby-execjs
 RUN apt-get install -y less unzip wget screen git net-tools openssh-server telnet sudo
+RUN apt-get install -y python-pygments
 RUN gem install bundler
 
 RUN echo "zz ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
