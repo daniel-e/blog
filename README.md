@@ -17,12 +17,17 @@ git commit -m "initial import"
 git push
 ```
 
-Now, we create a docker image which we use in the future to write new posts.
+Now, this repository can be used to create a blog from scratch. 
+
+## Create the image
 
 ```bash
+git clone git@github.com:daniel-e/blog.git
+cd blog
 cp ~/.ssh/id_rsa .     # security?
 cp ~/.ssh/id_rsa.pub .
 cp id_rsa.pub authorized_keys
+# build a new image
 sudo docker build -t jekyll/init .
 ```
 
@@ -31,7 +36,7 @@ We now have a docker image which we can use to create the blog. The advantage of
 # Customize
 
 ```bash
-sudo ~/docker/docker run -t -i -p 4000:4000 -p 4022:22 -v /tmp:/host jekyll/init
+sudo docker run --name jekyll -t -i -p 4000:4000 -p 4022:22 -v /tmp:/host jekyll/init
 
 ssh zz@localhost -p 4022
 git clone git@github.com:daniel-e/blog.git
@@ -56,7 +61,6 @@ cd daniel-e.github.io/
 git add -A
 git commit -m "new post"
 git push
-...
 ```
 
 # Useful links
@@ -65,3 +69,10 @@ git push
 * https://help.github.com/articles/using-jekyll-with-pages/
 * http://jekyllrb.com/docs/github-pages/
 
+## Additional notes
+
+First, I had trouble to run docker. I have fixed this by installing cgroup packages:
+
+```bash
+sudo apt-get install cgroup-bin libcgroup-dev
+```

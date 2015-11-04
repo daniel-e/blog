@@ -7,7 +7,7 @@ In this post we will see how the average digit of the MNIST database of handwrit
 
 The MNIST database of handwritten digits (see [here](http://yann.lecun.com/exdb/mnist/)) is a very popular dataset used by the machine learning research community for testing the performance of learning algorithms for the task of recognizing handwritten digits.
 
-We will use the dataset that has been created in this [post](/2015-09-25-MNIST-handwritten-digits-for-Octave). The dataset can be also downloaded from [here](https://github.com/daniel-e/blogdata/tree/master/average_digits).
+We will use the dataset that has been created in this [post](/2015-07-25-MNIST-handwritten-digits-for-Octave). The dataset can be also downloaded from [here](https://github.com/daniel-e/blogdata/tree/master/average_digits).
 
 The following image is an example of the first 30 digits in the training set.
 
