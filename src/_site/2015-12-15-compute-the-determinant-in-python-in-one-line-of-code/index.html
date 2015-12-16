@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-  <title>Averaging MNIST handwritten digits with Octave</title>
+  <title>Computing the determinant in Python in one (long) line of code</title>
 
   <meta name="author" content="daniel-e" />
   
@@ -46,11 +46,11 @@
   <script src="/js/highlight.pack.js"></script>
 
   <!-- Facebook OpenGraph tags -->
-  <meta property="og:title" content="Averaging MNIST handwritten digits with Octave" />
+  <meta property="og:title" content="Computing the determinant in Python in one (long) line of code" />
   <meta property="og:type" content="website" />
   
   
-  <meta property="og:url" content="http://daniel-e.github.io/2015-10-19-averaging-mnist-handwritten-digits-with-octave/" />
+  <meta property="og:url" content="http://daniel-e.github.io/2015-12-15-compute-the-determinant-in-python-in-one-line-of-code/" />
   
   
   
@@ -102,9 +102,9 @@
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
       <div class="post-heading">
-        <h1>Averaging MNIST handwritten digits with Octave</h1>
+        <h1>Computing the determinant in Python in one (long) line of code</h1>
         
-        <span class="post-meta">Posted on October 19, 2015</span>
+        <span class="post-meta">Posted on December 15, 2015</span>
       </div>
      </div>
   </div>
@@ -113,86 +113,28 @@
 <article>
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-	  <p>In this post we will see how the average digit of the MNIST database of handwritten digits looks like.</p>
+	  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 
-<p>The MNIST database of handwritten digits (see <a href="http://yann.lecun.com/exdb/mnist/">here</a>) is a very popular dataset used by the machine learning research community for testing the performance of learning algorithms for the task of recognizing handwritten digits.</p>
+<p>Computing the determinant is one of the fundamental operations in linear algebra with many practical applications. The determinant can be used to compute the area of a parallelogram or to check if there exists a solution for a system of linear equations. The determinant is defined only for square matrices and can be computed recursively.</p>
 
-<p>We will use the dataset that has been created in this <a href="/2015-07-25-MNIST-handwritten-digits-for-Octave">post</a>. The dataset can be also downloaded from <a href="https://github.com/daniel-e/blogdata/tree/master/average_digits">here</a>.</p>
+<p>If <script type="math/tex">\alpha_{ij}</script> is the element of the matrix A at row i and column j with <script type="math/tex">i,j \geq 1</script>  then the determinant can be computed as follows:</p>
 
-<p>The following image is an example of the first 30 digits in the training set.</p>
+<script type="math/tex; mode=display">\det(A) = \alpha_{11} \det \tilde{A}_{11} ... - \alpha_{21} \det \tilde{A}_{21} ... + \alpha_{31} \det \tilde{A}_{31} - ...</script>
 
-<p><img src="/assets/digits.png" alt="examples of some MNIST handwritten digits" /></p>
+<p>where <script type="math/tex">\tilde{A}_{ij}</script> is the matrix A with row i and column j being removed. The recursion terminates if the matrix A is a 1x1 matrix because the determinant of a 1x1 matrix simply is <script type="math/tex">\alpha_{11}</script>.</p>
 
-<p>It has been created with the script shown at the bottom of this post. The distribution of the digits in the training set is as follows:</p>
+<p>Translating this into Python code we finally get:</p>
 
-<pre>0: 5923
-1: 6742
-2: 5958
-3: 6131
-4: 5842
-5: 5421
-6: 5918
-7: 6265
-8: 5851
-9: 5949</pre>
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">import</span> <span class="n">numpy</span> <span class="n">as</span> <span class="n">np</span>
 
-<pre><code class="matlab">load('mnist.txt.gz');  % load the dataset
-X = 255 - trainX;      % invert the pixels
-r = [];
-for i = 0:9
-        rows = (trainY == i);
-        n = sum(rows);
-        d = reshape(sum(X(rows, :)) / n, 28, 28)';
-        r = [r, d];
-end
-imshow(r, [0, 255]);
-</code></pre>
+<span class="n">def</span> <span class="n">det</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">:</span>
+    <span class="k">return</span> <span class="n">sum</span><span class="p">([(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="n">i</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">det</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="k">delete</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="k">delete</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="n">in</span> <span class="n">range</span><span class="p">(</span><span class="n">A</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span> <span class="k">if</span> <span class="n">A</span><span class="p">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">else</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 
-<p><img src="/assets/avgdigits.png" alt="examples of some MNIST handwritten digits" /></p>
+<span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">print</span> <span class="n">det</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></code></pre></div>
 
-<h2 id="source">Source</h2>
-
-<pre><code class="matlab">1;
-more off;
-
-% load the dataset if it has not been loaded yet
-if exist("trainX") == 0
-        load("mnist.txt.gz");
-end
-
-X = 255 - trainX;  % invert the pixels
-
-% show some examples
-n = 15;
-m = [];
-for i = 0:n - 1
-        d1 = reshape(X(i + 1, :), 28, 28)';
-        d2 = reshape(X(i + 1 + n, :), 28, 28)';
-        m = [m, [d1; d2]];
-end
-
-imshow(m, [0, 255]);
-
-% statistics about the distribution of the digits in the training set, i.e.
-% count the number of occurrences of each digit
-for i = 0:9
-        printf('%d: %d\n', i, sum(trainY == i));
-end
-
-display('press enter to see the averages ...');
-pause;
-
-% average the digits
-r = [];
-for i = 0:9
-        rows = (trainY == i);
-        n = sum(rows);
-        d = reshape(sum(X(rows, :)) / n, 28, 28)';
-        r = [r, d];
-end    
-
-imshow(r, [0, 255]);
-</code></pre>
+<p><strong>Note</strong>: this is not a very efficient way to compute the determinant of a matrix because this approach takes O(n!) steps which is very inefficient even for rather small matrices. If you really need an efficient way which returns the solution in a finite time even for big matrices you should use <code>numpy.linalg.det</code> from numpy instead.</p>
 
 	</div>
   </div>
@@ -203,13 +145,9 @@ imshow(r, [0, 255]);
     <ul class="pager blog-pager">
       
       <li class="previous">
-        <a href="/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave" data-toggle="tooltip" data-placement="top" title="k-Nearest Neighbors on MNIST digits with Octave">&larr; Previous Post</a>
+        <a href="/2015-10-19-averaging-mnist-handwritten-digits-with-octave" data-toggle="tooltip" data-placement="top" title="Averaging MNIST handwritten digits with Octave">&larr; Previous Post</a>
       </li>
       
-      
-      <li class="next">
-        <a href="/2015-12-15-compute-the-determinant-in-python-in-one-line-of-code" data-toggle="tooltip" data-placement="top" title="Computing the determinant in Python in one (long) line of code">Next Post &rarr;</a>
-      </li>
       
     </ul>
   </div>

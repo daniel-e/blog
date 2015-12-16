@@ -11,6 +11,7 @@ RUN apt-get install -y less unzip wget screen git net-tools openssh-server telne
 RUN apt-get install -y python-pygments
 RUN gem install bundler
 
+RUN echo "docker" > /etc/hostname
 RUN echo "zz ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN mkdir /var/run/sshd
 
