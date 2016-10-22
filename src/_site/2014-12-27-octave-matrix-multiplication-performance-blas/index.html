@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Beautiful Jekyll | MIT license | Copyright Dean Attali 2016 -->
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Octave matrix multiplication performance for different BLAS implementations</title>
+
+  <meta name="author" content="daniel-e" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="daniel-e blog - Notes on machine learning, security, my activities on GitHub and more" href="/feed.xml" />
+
+  
+    
+      <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    
+      <link rel="stylesheet" href="/css/bootstrap-social.css" />
+    
+      <link rel="stylesheet" href="/css/main.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+    
+  
+
+  
+
+  
+
+  
+
+    <!-- Facebook OpenGraph tags -->
+  
+
+  
+  <meta property="og:title" content="Octave matrix multiplication performance for different BLAS implementations" />
+  
+
+   
+  <meta property="og:description" content="Octave is a tool for doing linear algebra. When doing linear algebra one of the most fundamental operations is the matrix multiplication. A straightforward algorithm to do a matrix operation requires O(n³) multiplications. In 196 Strassen developed an algorithm for multiplying big matrices (n &amp;gt; 100 to 1000) which requires...">
+  
+
+
+  <meta property="og:type" content="website" />
+
+  
+  <meta property="og:url" content="http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas/" />
+  <link rel="canonical" href="http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas/" />
+  
+
+  
+  
+
+  <!-- Twitter summary cards -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@yourname" />
+  <meta name="twitter:creator" content="@yourname" />
+
+  
+  <meta name="twitter:title" content="Octave matrix multiplication performance for different BLAS implementations" />
+  
+
+  
+  <meta name="twitter:description" content="Octave is a tool for doing linear algebra. When doing linear algebra one of the most fundamental operations is the matrix multiplication. A straightforward algorithm to do a matrix operation requires O(n³) multiplications. In 196 Strassen developed an algorithm for multiplying big matrices (n &amp;gt; 100 to 1000) which requires...">
+  
+
+  
+
+</head>
+
+
+  <body>
+  
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="http://daniel-e.github.io">daniel-e blog</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="https://github.com/daniel-e/">GitHub</a>
+
+          </li>
+        
+        
+        
+          <li class="navlinks-container">
+            <a class="navlinks-parent" href="javascript:void(0)">Projects</a>
+            <div class="navlinks-children">
+              
+                
+                  
+            
+
+
+
+
+
+<a href="https://github.com/daniel-e/tetros">Tetros</a>
+
+                
+              
+                
+                  
+            
+
+
+
+
+
+<a href="https://github.com/daniel-e/stealthy">Stealthy</a>
+
+                
+              
+            </div>
+          </li>
+        
+        
+      </ul>
+    </div>
+
+	
+
+  </div>
+</nav>
+
+
+    <!-- TODO this file has become a mess, refactor it -->
+
+
+
+
+
+<header class="header-section ">
+
+<div class="intro-header no-img">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-heading">
+          <h1>Octave matrix multiplication performance for different BLAS implementations</h1>
+		  
+		  
+		  
+		  <span class="post-meta">Posted on December 27, 2014</span>
+		  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+      <article role="main" class="blog-post">
+        <p>Octave is a tool for doing linear algebra. When doing linear algebra one of the most fundamental operations is the <a href="http://en.wikipedia.org/wiki/Matrix_multiplication">matrix multiplication</a>. A straightforward algorithm to do a matrix operation requires O(n³) multiplications. In 196 <a href="http://en.wikipedia.org/wiki/Matrix_multiplication#Algorithms_for_efficient_matrix_multiplication">Strassen developed an algorithm</a> for multiplying big matrices (n &gt; 100 to 1000) which requires O(n^2.807) multiplications.</p>
+
+<p>Octave can use different implementations for doing matrix multiplication, e.g. <a href="http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">BLAS</a>, <a href="http://en.wikipedia.org/wiki/Automatically_Tuned_Linear_Algebra_Software">ATLAS</a> and <a href="http://www.openblas.net/">OpenBLAS</a>. We have measured the performances of the different implementations for this post.</p>
+
+<p>All tests were running on a quad-core Intel(R) Core(TM) i7-2670QM CPU @ 2.20GHz with hyperthreading enabled. As Linux we used Linux Mint 17 (Qiana) on which we installed the packages “octave” and “libatlas3-base”. This configuration we will refer to as “default” in this post. We have also tested ATLAS, the single-threaded (“satlas”) and the multi-threaded (“tatlas”) versions and OpenBLAS (“openblas”) which is multi-treaded by default.</p>
+
+<p>Before we compiled ATLAS we have configured it with the following arguments:</p>
+
+<pre><code class="bash">./configure -b 64 --shared -D -c -DPentiumCPS=2200 --with-netlib-lapack-tarfile=lapack-3.5.0.tgz
+</code></pre>
+
+<p>For OpenBLAS we used the default configuration and just executed make to create the libraries.</p>
+
+<p>As all libraries have been created we started Octave as follows:</p>
+
+<pre>default : octave -p perf.m
+satlas  : LD_PRELOAD=libsatlas.so octave -p perf.m
+tatlas  : LD_PRELOAD=libtatlas.so octave -p perf.m
+openblas: LD_PRELOAD=libopenblas.so octave -p perf.m
+</pre>
+
+<p>The fastest implementation is OpenBLAS. It took 5.1 seconds to multiply a 5000x5000 matrix. The multi-threaded ATLAS implementation took 6.9 seconds, the single-threaded implementation took 18 seconds and the default configuration required 32 seconds to multiply the matrix.</p>
+
+<p>Just for comparison we also added 100 times a 5000x5000 matrix. It took for all implementations about 13.5 seconds, i.e. one 5000x5000 matrix addition took approximately 0.135 seconds.</p>
+
+<p><img src="/assets/perfchartmult1.png" alt="performance of different blas implemenations" /></p>
+
+
+      </article>
+
+      
+
+      
+        <!-- Check if any share-links are active -->
+
+
+
+
+<section id = "social-share-section">
+
+  <!--- Share on Twitter -->
+  
+    <a href="https://twitter.com/intent/tweet?text=Octave+matrix+multiplication+performance+for+different+BLAS+implementations+http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas/"
+      class="btn btn-social-icon btn-twitter" title="Share on Twitter">
+      <span class="fa fa-fw fa-twitter" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Facebook -->
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas/"
+      class="btn btn-social-icon btn-facebook" title="Share on Facebook">
+      <span class="fa fa-fw fa-facebook" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Google Plus -->
+  
+
+  <!--- Share on LinkedIn -->
+  
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas/"
+      class="btn btn-social-icon btn-linkedin" title="Share on LinkedIn">
+      <span class="fa fa-fw fa-linkedin" aria-hidden="true"></span>
+    </a>
+  
+
+</section>
+
+
+
+      
+
+      <ul class="pager blog-pager">
+        
+        <li class="previous">
+          <a href="/2014-12-27-cpu-throttling-apparently-enabled/" data-toggle="tooltip" data-placement="top" title="CPU Throttling apparently enabled">&larr; Previous Post</a>
+        </li>
+        
+        
+        <li class="next">
+          <a href="/2014-12-31-maximum-gflops-element-wise-matrix-multiplication/" data-toggle="tooltip" data-placement="top" title="Maximum GFLOPS for an element-wise matrix multiplication">Next Post &rarr;</a>
+        </li>
+        
+      </ul>
+
+      
+        <div class="disqus-comments">
+          
+<div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+	    var disqus_shortname = 'danieleblog';
+	    /* ensure that pages with query string get the same discussion */
+            var url_parts = window.location.href.split("?");
+            var disqus_url = url_parts[0];	    
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+    <footer>
+  <div class="container beautiful-jekyll-footer">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+          
+          <li>
+            <a href="https://github.com/https://github.com/daniel-e/" title="GitHub">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+      
+		  
+          <li>
+            <a href="mailto:git.daniele@gmail.com" title="Email me">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+		  
+		  
+      
+      
+      
+      
+		  
+        </ul>
+        <p class="copyright text-muted">
+		  daniel-e
+		  &nbsp;&bull;&nbsp;
+		  2016
+
+		  
+		  &nbsp;&bull;&nbsp;
+		  <a href="http://daniel-e.github.io">home</a>
+		  
+	    </p>
+	        <!-- Please don't remove this, keep my open source work credited :) -->
+		<p class="theme-by text-muted">
+		  Theme by
+		  <a href="http://deanattali.com/beautiful-jekyll/">beautiful-jekyll</a>
+		</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  
+    
+
+
+
+
+
+
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script>
+      	if (typeof jQuery == 'undefined') {
+      	  document.write('<script src="/js/jquery-1.11.2.min.js"></scr' + 'ipt>');
+      	}
+      </script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/bootstrap.min.js"></script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/main.js"></script>
+    
+  
+
+
+
+	<!-- Google Analytics -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-69423413-1', 'auto');
+		ga('send', 'pageview');
+	</script>
+	<!-- End Google Analytics -->
+
+
+  
+  </body>
+</html>

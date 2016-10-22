@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Beautiful Jekyll | MIT license | Copyright Dean Attali 2016 -->
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>A simple trick if sequential I/O is the bottleneck</title>
+
+  <meta name="author" content="daniel-e" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="daniel-e blog - Notes on machine learning, security, my activities on GitHub and more" href="/feed.xml" />
+
+  
+    
+      <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    
+      <link rel="stylesheet" href="/css/bootstrap-social.css" />
+    
+      <link rel="stylesheet" href="/css/main.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+    
+  
+
+  
+
+  
+
+  
+
+    <!-- Facebook OpenGraph tags -->
+  
+
+  
+  <meta property="og:title" content="A simple trick if sequential I/O is the bottleneck" />
+  
+
+   
+  <meta property="og:description" content="In the following post I will show you a simple trick to increase the throughput of a disk’s sequential I/O up to two orders of magnitude if for some computation the sequential I/O is the bottleneck and computation can be parallized. I will motivate this via an approach that is...">
+  
+
+
+  <meta property="og:type" content="website" />
+
+  
+  <meta property="og:url" content="http://daniel-e.github.io/2015-12-30-a-simple-trick-if-sequential-io-is-the-bottleneck/" />
+  <link rel="canonical" href="http://daniel-e.github.io/2015-12-30-a-simple-trick-if-sequential-io-is-the-bottleneck/" />
+  
+
+  
+  
+
+  <!-- Twitter summary cards -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@yourname" />
+  <meta name="twitter:creator" content="@yourname" />
+
+  
+  <meta name="twitter:title" content="A simple trick if sequential I/O is the bottleneck" />
+  
+
+  
+  <meta name="twitter:description" content="In the following post I will show you a simple trick to increase the throughput of a disk’s sequential I/O up to two orders of magnitude if for some computation the sequential I/O is the bottleneck and computation can be parallized. I will motivate this via an approach that is...">
+  
+
+  
+
+</head>
+
+
+  <body>
+  
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="http://daniel-e.github.io">daniel-e blog</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="https://github.com/daniel-e/">GitHub</a>
+
+          </li>
+        
+        
+        
+          <li class="navlinks-container">
+            <a class="navlinks-parent" href="javascript:void(0)">Projects</a>
+            <div class="navlinks-children">
+              
+                
+                  
+            
+
+
+
+
+
+<a href="https://github.com/daniel-e/tetros">Tetros</a>
+
+                
+              
+                
+                  
+            
+
+
+
+
+
+<a href="https://github.com/daniel-e/stealthy">Stealthy</a>
+
+                
+              
+            </div>
+          </li>
+        
+        
+      </ul>
+    </div>
+
+	
+
+  </div>
+</nav>
+
+
+    <!-- TODO this file has become a mess, refactor it -->
+
+
+
+
+
+<header class="header-section ">
+
+<div class="intro-header no-img">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-heading">
+          <h1>A simple trick if sequential I/O is the bottleneck</h1>
+		  
+		  
+		  
+		  <span class="post-meta">Posted on December 30, 2015</span>
+		  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+      <article role="main" class="blog-post">
+        <p>In the following post I will show you a simple trick to increase the throughput
+of a disk’s sequential I/O up to two orders of magnitude if for some
+computation the sequential I/O is the bottleneck and computation can be
+parallized. I will motivate this via an approach that is typically used for
+machine learning experiments, i.e. pipelining.</p>
+
+<h1 id="data-processing-via-pipelines">Data processing via pipelines</h1>
+
+<p>In machine learning we often use pipelines for data processing. Some process
+B consumes and processes the output of some process A and passes the result
+to the input of another other process C and so on. This flow of data is
+illustrated in the following diagram.</p>
+
+<p><img src="/assets/io-bottleneck/pipeline.svg" alt="data processing pipeline" /></p>
+
+<p>When using Linux this can be realized very easily via pipes. For example, extracting the second column of a CSV files, sorting the values and displaying only the first ten smallest elements is done with the following commands:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">cat file.csv | cut -d, -f2 | sort | head</code></pre></figure>
+
+<p>The <code class="highlighter-rouge">cat</code> command reads the data from disk and writes it to stdout.
+The <code class="highlighter-rouge">cut</code> command reads the data from stdin (which is connected to stdout of
+the <code class="highlighter-rouge">cat</code> process), selects the second column and writes the result to
+stdout. The stdin of the <code class="highlighter-rouge">sort</code> command is connected with stdout of
+the <code class="highlighter-rouge">cut</code> command. The <code class="highlighter-rouge">sort</code> command reads from stdin, sorts the data
+and writes the result to stdout. Finally, the <code class="highlighter-rouge">head</code> command reads the
+result from the <code class="highlighter-rouge">sort</code> command (via the connection from the sort’s stdout
+to the head’s stdin) and writes only the first ten lines to stdout.</p>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<p>There are two big advantages when using pipelines for data processing: 
+First, the whole process is parallelized with no additional implementation
+costs. All processes run at the same time. If data is available at the 
+input of one process it can already consume the data while the process
+which feeds the input is still working on the next chunk of data. If you
+would do this in a single process you often end up with concurrent
+programming. Concurrent programming is challenging and error prone.
+Nonderterministic behavior for example induced by race conditions which
+might happen even only once in <script type="math/tex">10^8</script> steps are very difficult to
+detect und to debug and could render the results of the data processing
+useless. In the worst case you may not even notice a problem and you could 
+make the wrong decisions based on incorrect data. Thus, instead of
+trying to parallelize many tasks in one big task it is usually a better
+idea to split big tasks into smaller tasks and connecting those tasks via
+pipes which brings us to the second big advantage. Such an approach is
+very flexible. A process can easily be replaced by another process and
+smaller and well separated processes help to reduce the complexity which
+usually implies less bugs.</p>
+
+<p>If we have successfully established a highly parallelized data processing pipeline we often encounter another problem. At some point we usually need to read some data from the disk in order to process the data. We usually want to read the data via sequential I/O to optimally utilize the data throughput of the disk. However, compared to the throughput of the CPU that can be achieved for many tasks even sequential disk I/O cannot achieve the throughput which is required to optimally utilize the CPU. The disk becomes the bottleneck.</p>
+
+<p>There’s sometimes an easy and very effective solution to this problem but 
+before describing this solution let me mention a very useful fact. If
+the data is read from disk for the first time and if it fits into main
+memory there’s a good chance that the data is fully cached by the operating
+system. The next time we want to read the data from the disk the operating
+system can provide the data from the much faster cache in the main memory
+instead of accessing the slow disk. So we gain a significant boost in the
+throughput if the data is in the cache and chances are good that the CPU
+will become the bottleneck for our computation now. ;)</p>
+
+<h1 id="the-trick">The trick</h1>
+
+<p>So the trick is to read the data once from the stream and simply use
+it many times. <strong>Da wir möglicherweise von einem Stream lesen, der mehr
+Daten liefert als in den Speicher passen wäre es keine Option die Daten
+komplett zu lesen und die Experimente darauf laufen zu lassen. Wir könnten unsere … so implementieren, dass sie einen Teil des Streams lesen, dann darauf arbeiten, das Ergebnis liefern und den nächsten Teil einlesen, usw.
+Dann hätten wir jedoch wieder Implementierungsaufwand mit erhöhter
+Code-Komplexität und somit einer erhöhten Fehleranfälligkeit. Das ist
+jedoch garnicht notwendig. Denn</strong> Due to the operating systems’ page
+cache it often comes for free. No additional implementation effort is
+required. Let me explain why.</p>
+
+<p>When doing machine learning experiments we typically build a data 
+processing pipeline as described above. Some or all tasks in that pipeline 
+can be parameterized (e.g. by setting some thresholds or the number of clusters for
+some clustering algorithm) and usually we run several experiments in which
+we vary the parameters for each task to find an optimal solution.
+We can formalize this as follows. Let <script type="math/tex">E_\theta:X\to Y</script> be
+a function that is parameterized by <script type="math/tex">\theta</script> which takes some input
+<script type="math/tex">x\in X</script> and computes some output <script type="math/tex">y\in Y</script>. For each particular
+<script type="math/tex">\theta</script> this function is computed by the pipeline. We run several
+experiments for different values of <script type="math/tex">\theta</script>, i.e. we compute the 
+following functions:</p>
+
+<script type="math/tex; mode=display">E_{\theta_1}(x), E_{\theta_2}(x), E_{\theta_3}(x), \dots</script>
+
+<p>We could do it sequentially, i.e. we compute <script type="math/tex">E_{\theta_1}(x)</script> first.
+If the computation of <script type="math/tex">E_{\theta_1}(x)</script> has finished we compute
+<script type="math/tex">E_{\theta_2}(x)</script> and so on. If <script type="math/tex">t_E</script> is the time required
+to compute the function <script type="math/tex">E</script> and <script type="math/tex">t_d</script> is the time required to read the
+data <script type="math/tex">x</script> from the disk this approach
+takes <script type="math/tex">2(t_d + t_E)</script> time if the data does not fit into the cache. In
+general for <script type="math/tex">n</script> sequential evaluations of the function <script type="math/tex">E</script> the time
+<script type="math/tex">T(n) = n(t_d + t_E)</script> is required.</p>
+
+<p>If the function <script type="math/tex">E</script> is limited by the bandwidth with which the input
+<script type="math/tex">x</script> can be read from disk we can do better if we evaluate the function <script type="math/tex">E</script>
+for different parameters in parallel, i.e. we compute <script type="math/tex">E_{\theta_1}(x)</script>,
+<script type="math/tex">E_{\theta_2}(x)</script> and so on at the same time. If we evaluate the function <script type="math/tex">E</script>
+for <script type="math/tex">n</script> different parameters in parallel we get the following result for the
+running time:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{eqnarray}
+	T(n) & = &(t_d + t_{E_{\theta_1}}) + (t_c + t_{E_{\theta_2}}) + (t_c + t_{E_{\theta_3}}) + \dots + (t_c + t_{E_{\theta_n}}) \\
+		& = &t_d + (n-1)t_c + nt_E
+\end{eqnarray} %]]></script>
+
+<p>where <script type="math/tex">t_c</script> is the time required to read the data from the page cache.
+Because we can assume that the ratio between the page cache bandwidth and
+the disk bandwidth is constant,
+i.e. <script type="math/tex">t_d = kt_c</script> for some constant <script type="math/tex">k</script> (typically <script type="math/tex">k>50</script>) we get</p>
+
+<script type="math/tex; mode=display">T(n) = \left(1+\frac{(n-1)}{k}\right)t_d + nt_E</script>
+
+<p>Because the evaluation of <script type="math/tex">E</script> is bounded by I/O (by definition above) the
+last term <script type="math/tex">nt_E</script> must be an upper bound for the time required to
+compute the function <script type="math/tex">E</script> concurrently for <script type="math/tex">n</script> different parameters.
+Concretely, if</p>
+
+<!-- 
+the last term nt_E ist sogar noch kleiner
+Because 
+For example, if $$n=8$$ and $$k=50$$ we get $$T(n) = 1.06 t_d + nt_E$$.
+Advantage: E must not be modified
+
+To evaluate the function $$E_{\theta_2}, \dots, E_{\theta_n}$$ the data
+is already in the page cache...
+
+* sollte man noch erwaehnen, dass es für streaming anwendung hat?
+-->
+
+      </article>
+
+      
+
+      
+        <!-- Check if any share-links are active -->
+
+
+
+
+<section id = "social-share-section">
+
+  <!--- Share on Twitter -->
+  
+    <a href="https://twitter.com/intent/tweet?text=A+simple+trick+if+sequential+I%2FO+is+the+bottleneck+http://daniel-e.github.io/2015-12-30-a-simple-trick-if-sequential-io-is-the-bottleneck/"
+      class="btn btn-social-icon btn-twitter" title="Share on Twitter">
+      <span class="fa fa-fw fa-twitter" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Facebook -->
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=http://daniel-e.github.io/2015-12-30-a-simple-trick-if-sequential-io-is-the-bottleneck/"
+      class="btn btn-social-icon btn-facebook" title="Share on Facebook">
+      <span class="fa fa-fw fa-facebook" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Google Plus -->
+  
+
+  <!--- Share on LinkedIn -->
+  
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://daniel-e.github.io/2015-12-30-a-simple-trick-if-sequential-io-is-the-bottleneck/"
+      class="btn btn-social-icon btn-linkedin" title="Share on LinkedIn">
+      <span class="fa fa-fw fa-linkedin" aria-hidden="true"></span>
+    </a>
+  
+
+</section>
+
+
+
+      
+
+      <ul class="pager blog-pager">
+        
+        <li class="previous">
+          <a href="/2015-12-17-memory-bandwidth/" data-toggle="tooltip" data-placement="top" title="Estimating memory bandwidth">&larr; Previous Post</a>
+        </li>
+        
+        
+        <li class="next">
+          <a href="/2016-01-05-nearest-neighbor-in-tiny-images-dataset/" data-toggle="tooltip" data-placement="top" title="Nearest neighbor search in the Tiny Images dataset">Next Post &rarr;</a>
+        </li>
+        
+      </ul>
+
+      
+        <div class="disqus-comments">
+          
+<div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+	    var disqus_shortname = 'danieleblog';
+	    /* ensure that pages with query string get the same discussion */
+            var url_parts = window.location.href.split("?");
+            var disqus_url = url_parts[0];	    
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+    <footer>
+  <div class="container beautiful-jekyll-footer">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+          
+          <li>
+            <a href="https://github.com/https://github.com/daniel-e/" title="GitHub">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+      
+		  
+          <li>
+            <a href="mailto:git.daniele@gmail.com" title="Email me">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+		  
+		  
+      
+      
+      
+      
+		  
+        </ul>
+        <p class="copyright text-muted">
+		  daniel-e
+		  &nbsp;&bull;&nbsp;
+		  2016
+
+		  
+		  &nbsp;&bull;&nbsp;
+		  <a href="http://daniel-e.github.io">home</a>
+		  
+	    </p>
+	        <!-- Please don't remove this, keep my open source work credited :) -->
+		<p class="theme-by text-muted">
+		  Theme by
+		  <a href="http://deanattali.com/beautiful-jekyll/">beautiful-jekyll</a>
+		</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  
+    
+
+
+
+
+
+
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script>
+      	if (typeof jQuery == 'undefined') {
+      	  document.write('<script src="/js/jquery-1.11.2.min.js"></scr' + 'ipt>');
+      	}
+      </script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/bootstrap.min.js"></script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/main.js"></script>
+    
+  
+
+
+
+	<!-- Google Analytics -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-69423413-1', 'auto');
+		ga('send', 'pageview');
+	</script>
+	<!-- End Google Analytics -->
+
+
+  
+  </body>
+</html>

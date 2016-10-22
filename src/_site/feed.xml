@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>daniel-e blog</title>
+    <description>Notes on machine learning, security, my activities on GitHub and more</description>
+    <link>http://daniel-e.github.io</link>
+    <atom:link href="http://daniel-e.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>DoubleGuard Detecting Intrusions In Multi-tier Web Applications</title>
+        <description>
+          
+          This is a short summary of the paper “DoubleGuard: Detecting Intrusions In Multi-tier Web Applications” by Le, M., Stavrou, A., &amp;amp; Kang, B. B. which appeared in 2012 in IEEE Transactions on dependable and secure computing, 9(4), 512-525. The authors developed an IDS system named DoubleGuard that models the network...
+        </description>
+        <pubDate>Fri, 21 Oct 2016 00:00:00 -0700</pubDate>
+        <link>http://daniel-e.github.io/2016-10-21-doubleguard-detecting-intrusions-in-multi-tier-web-applications/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2016-10-21-doubleguard-detecting-intrusions-in-multi-tier-web-applications/</guid>
+      </item>
+    
+      <item>
+        <title>Nearest neighbor search in the Tiny Images dataset</title>
+        <description>
+          
+          The Tiny Images dataset consists of 79,302,017 images, each being a 32x32 color RGB image. The images have been retrieved from the Internet from several image search engines, are stored in an uncompressed large binary file (227GB) so that each image can be easily accessed via random access and are...
+        </description>
+        <pubDate>Tue, 05 Jan 2016 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2016-01-05-nearest-neighbor-in-tiny-images-dataset/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2016-01-05-nearest-neighbor-in-tiny-images-dataset/</guid>
+      </item>
+    
+      <item>
+        <title>A simple trick if sequential I/O is the bottleneck</title>
+        <description>
+          
+          In the following post I will show you a simple trick to increase the throughput of a disk’s sequential I/O up to two orders of magnitude if for some computation the sequential I/O is the bottleneck and computation can be parallized. I will motivate this via an approach that is...
+        </description>
+        <pubDate>Wed, 30 Dec 2015 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2015-12-30-a-simple-trick-if-sequential-io-is-the-bottleneck/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2015-12-30-a-simple-trick-if-sequential-io-is-the-bottleneck/</guid>
+      </item>
+    
+      <item>
+        <title>Estimating memory bandwidth</title>
+        <description>
+          
+          Quite often it is the case that computations (e.g. matrix multiplication) are limited by the memory bandwidth, i.e. the amount of data that can be transfered from RAM into the CPU in a specific amount of time. If we know that the computation is bounded by the memory bandwidth we...
+        </description>
+        <pubDate>Thu, 17 Dec 2015 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2015-12-17-memory-bandwidth/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2015-12-17-memory-bandwidth/</guid>
+      </item>
+    
+      <item>
+        <title>Computing the determinant in Python in one (long) line of code</title>
+        <description>
+          
+          Computing the determinant is one of the fundamental operations in linear algebra with many practical applications. The determinant can be used to compute the area of a parallelogram or to check if there exists a solution for a system of linear equations. The determinant is defined only for square matrices...
+        </description>
+        <pubDate>Tue, 15 Dec 2015 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2015-12-15-computing-the-determinant-in-python-in-one-line-of-code/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2015-12-15-computing-the-determinant-in-python-in-one-line-of-code/</guid>
+      </item>
+    
+      <item>
+        <title>Averaging MNIST handwritten digits with Octave</title>
+        <description>
+          
+          In this post we will see how the average digit of the MNIST database of handwritten digits looks like. The MNIST database of handwritten digits (see here) is a very popular dataset used by the machine learning research community for testing the performance of learning algorithms for the task of...
+        </description>
+        <pubDate>Mon, 19 Oct 2015 00:00:00 -0700</pubDate>
+        <link>http://daniel-e.github.io/2015-10-19-averaging-mnist-handwritten-digits-with-octave/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2015-10-19-averaging-mnist-handwritten-digits-with-octave/</guid>
+      </item>
+    
+      <item>
+        <title>k-Nearest Neighbors on MNIST digits with Octave</title>
+        <description>
+          
+          TODO
+
+        </description>
+        <pubDate>Mon, 10 Aug 2015 00:00:00 -0700</pubDate>
+        <link>http://daniel-e.github.io/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2015-08-10-k-nearest-neighbours-on-mnist-digits-with-octave/</guid>
+      </item>
+    
+      <item>
+        <title>MNIST database of handwritten digits for Octave</title>
+        <description>
+          
+          In this post you will see how to convert the MNIST database of handwritten digits via rustml into a format that can be read with Octave. The MNIST database of handwritten digits (see here) is a very popular dataset used by the machine learning research community for testing the performance...
+        </description>
+        <pubDate>Sat, 25 Jul 2015 00:00:00 -0700</pubDate>
+        <link>http://daniel-e.github.io/2015-07-25-MNIST-handwritten-digits-for-Octave/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2015-07-25-MNIST-handwritten-digits-for-Octave/</guid>
+      </item>
+    
+      <item>
+        <title>Maximum GFLOPS for an element-wise matrix multiplication</title>
+        <description>
+          
+          A question that often comes into my mind when doing computations with Octave or other numerical libraries is how good do they utilize the CPU. Recently I was interested in estimating the number of GFLOPS that can be achieved with Octave for the element-wise matrix multiplication. For an nxn matrix...
+        </description>
+        <pubDate>Wed, 31 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-31-maximum-gflops-element-wise-matrix-multiplication/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-31-maximum-gflops-element-wise-matrix-multiplication/</guid>
+      </item>
+    
+      <item>
+        <title>Octave matrix multiplication performance for different BLAS implementations</title>
+        <description>
+          
+          Octave is a tool for doing linear algebra. When doing linear algebra one of the most fundamental operations is the matrix multiplication. A straightforward algorithm to do a matrix operation requires O(n³) multiplications. In 196 Strassen developed an algorithm for multiplying big matrices (n &amp;gt; 100 to 1000) which requires...
+        </description>
+        <pubDate>Sat, 27 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-27-octave-matrix-multiplication-performance-blas/</guid>
+      </item>
+    
+      <item>
+        <title>CPU Throttling apparently enabled</title>
+        <description>
+          
+          When compiling ATLAS (Automatically Tuned Linear Algebra Software) on modern CPUs it may happen that you get the following error message: CPU Throttling apparently enabled! It appears you have cpu throttling enabled, which makes timings unreliable and an ATLAS install nonsensical. Aborting. This is because today most operating systems  turn...
+        </description>
+        <pubDate>Sat, 27 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-27-cpu-throttling-apparently-enabled/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-27-cpu-throttling-apparently-enabled/</guid>
+      </item>
+    
+      <item>
+        <title>Permission denied for lsof in Docker</title>
+        <description>
+          
+          On my host system I have installed Linux Mint 17 and on that host I’m running Docker with Ubuntu 14.10. Recently I wanted to call lsof in a Docker container and I got the following permission denied error: root@ada77fe6ef60:/tmp $ lsof -p 751 COMMAND PID USER FD TYPE DEVICE SIZE/OFF...
+        </description>
+        <pubDate>Fri, 26 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-26-permission-denied-for-lsof-in-docker/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-26-permission-denied-for-lsof-in-docker/</guid>
+      </item>
+    
+      <item>
+        <title>Octave performance - Ubuntu 14.10 vs Linux Mint 17 Qiana</title>
+        <description>
+          
+          Recently I played around with Octave that I’ve installed on Ubuntu 14.10 running in a Docker container. The host system on which Docker is running is a Linux Mint 17 (Qiana). I was wondering whether there is a significant overhead induced by Docker when doing big matrix multiplications. So, I’ve...
+        </description>
+        <pubDate>Wed, 24 Dec 2014 00:00:00 -0800</pubDate>
+        <link>http://daniel-e.github.io/2014-12-24-octave-performance-ubuntu-14-10-vs-linux-mint-17-quiana/</link>
+        <guid isPermaLink="true">http://daniel-e.github.io/2014-12-24-octave-performance-ubuntu-14-10-vs-linux-mint-17-quiana/</guid>
+      </item>
+    
+  </channel>
+</rss>

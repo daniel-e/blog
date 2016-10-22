@@ -1,78 +1,47 @@
-# Init
-
-The following steps show how to create a new blog from scratch. First, we need to create a new repository on GitHub. Then, we download a theme and push it into the repository. This has been done as follows and needs to be done only once.
+# Create a new blog
 
 ```bash
-# 2015/10/28
-git clone git@github.com:daniel-e/blog.git
-cd blog
 wget -O beautiful-jekyll.zip https://github.com/daattali/beautiful-jekyll/archive/master.zip
 unzip beautiful-jekyll.zip
-mv beautiful-jekyll-master/ src
-echo "source 'https://rubygems.org'" > src/Gemfile
-echo "gem 'github-pages'" >> src/Gemfile
+mv beautiful-jekyll-master blog
 
-git add beautiful-jekyll.zip src
-git commit -m "initial import"
-git push
-```
-
-Now, this repository can be used to create a blog from scratch. 
-
-## Create the image
-
-```bash
-git clone git@github.com:daniel-e/blog.git
-cd blog
-cp ~/.ssh/id_rsa .     # security?
-cp ~/.ssh/id_rsa.pub .
-cp id_rsa.pub authorized_keys
-# build a new image
-sudo docker build -t jekyll/init .
-```
-
-We now have a docker image which we can use to create the blog. The advantage of this solution is that it is reproducible.
-
-# Customize
-
-```bash
-sudo docker run --name jekyll -t -i -p 4000:4000 -p 4022:22 -v /tmp:/host jekyll/init
-
-ssh zz@localhost -p 4022
-git clone git@github.com:daniel-e/blog.git
-cd blog/src
-
-[modify the files]
-
-# look for updates
-sudo bundle update
-
-# test the blog
-# http://localhost:4000
+docker build -t jek/1 .
+docker run -t -i -p 4000:4000 --net=host -v $PWD/blog:/blog jek/1
+cd /blog
+bundle install
 bundle exec jekyll serve
 ```
 
+Go to a browser and open `localhost:4000`. A page should be visible.
+
+Commit the changes to a new docker image.
+
+```bash
+docker ps
+docker commit <container id> jek/2
+```
+
+Now you can edit your blog on the host. When finished, create a new site.
+
+```bash
+docker run -t -i -p 4000:4000 --net=host -v $PWD/blog:/blog jek/2
+cd /blog
+bundle update
+# if there were updates you could commit the changes
+# docker ps
+# docker commit <container id> jek/2
+jekyll serve
+jekyll build
+```
+
 # Publish
-
 ```bash
-git clone git@github.com:daniel-e/daniel-e.github.io.git
-rsync -rv _site/* daniel-e.github.io/
-cd daniel-e.github.io/
-git add -A
-git commit -m "new post"
-git push
+rsync _site/* ~/Dropbox/github/blog/
 ```
 
-# Useful links
-
-* http://jekyllthemes.org/
-* https://help.github.com/articles/using-jekyll-with-pages/
-* http://jekyllrb.com/docs/github-pages/
-
-## Additional notes
-
-First, I had trouble to run docker. I have fixed this by installing cgroup packages:
+# Create screenshots from papers
 
 ```bash
-sudo apt-get install cgroup-bin libcgroup-dev
+convert -resize 220x -background white -alpha remove paper.pdf output.png
 ```
+
