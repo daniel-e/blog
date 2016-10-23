@@ -9,24 +9,17 @@ docker build -t jek/1 .
 docker run -t -i -p 4000:4000 --net=host -v $PWD/blog:/blog jek/1
 cd /blog
 bundle install
-```
-
-Commit the changes to a new docker image. For that execute the following commands in the host.
-
-```bash
-docker ps                           # to get the container id
-docker commit <container id> jek/2
-```
-
-In docker do
-
-```bash
 bundle exec jekyll serve
 ```
 
 Go to a browser and open `localhost:4000`. A page should be visible.
 
-# Update a blog
+Commit the changes to a new docker image.
+
+```bash
+docker ps
+docker commit <container id> jek/2
+```
 
 Now you can edit your blog on the host. When finished, create a new site.
 
@@ -43,7 +36,7 @@ jekyll build
 
 # Publish
 ```bash
-rsync _site/* ~/Dropbox/github/blog/
+rsync -rv _site/* /home/dz/Dropbox/github/daniel-e.github.io/
 ```
 
 # Create screenshots from papers
